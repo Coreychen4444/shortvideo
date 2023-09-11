@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+package shortvideo;
+
+option go_package = "github.com/Coreychen4444/shortvideo";
+//User
+message User {
+    int64 id = 1; // 用户id
+    string name = 2; // 用户名称
+    int64 follow_count = 3; // 关注总数
+    int64 follower_count = 4; // 粉丝总数
+    bool is_follow = 5; // true-已关注，false-未关注
+    string avatar = 6; //用户头像
+    string background_image = 7; //用户个人页顶部大图
+    string signature = 8; //个人简介
+    int64 total_favorited = 9; //获赞数量
+    int64 work_count = 10; //作品数量
+    int64 favorite_count = 11; //点赞数量
+}
+
+//Video
+message Video {
+    int64 id = 1; // 视频唯一标识
+    User author = 2; // 视频作者信息
+    string play_url = 3; // 视频播放地址
+    string cover_url = 4; // 视频封面地址
+    int64 favorite_count = 5; // 视频的点赞总数
+    int64 comment_count = 6; // 视频的评论总数
+    bool is_favorite = 7; // true-已点赞，false-未点赞
+    string title = 8; // 视频标题
+}
+
+message Comment {
+    int64 id = 1; // 视频评论id
+    User user =2; // 评论用户信息
+    string content = 3; // 评论内容
+    string create_date = 4; // 评论发布日期，格式 mm-dd
+}
+
+message Message {
+    int64 id = 1; // 消息id
+    int64 to_user_id = 2; // 该消息接收者的id
+    int64 from_user_id =3; // 该消息发送者的id
+    string content = 4; // 消息内容
+    string create_time = 5; // 消息创建时间
+}
+
+// User Service Definition
+service UserService {
+    rpc Register(UserRequest) returns (UserResponse) {};
+    rpc Login(UserRequest) returns (UserResponse) {};
+    rpc GetUserInfo(UserInfoRequest) returns (UserInfoResponse) {};
+    rpc FollowOrCancel(FollowOrCancelRequest) returns (FollowOrCancelResponse) {};
+    rpc GetFollowings(GetFollowingsRequest) returns (GetFollowingsResponse) {};
+    rpc GetFollowers(GetFollowersRequest) returns (GetFollowersResponse) {};
+    rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse) {};
+    rpc GetChatMessages(GetChatMessagesRequest) returns (GetChatMessagesResponse) {};
+    rpc SendMessage(SendMessageRequest) returns (SendMessageResponse) {};
+}
+
+message UserRequest {
+    string username = 1;
+    string password = 2;
+}
+message UserResponse {
+    int64 id = 1;
+    string token = 2;
+}
+
+message UserInfoRequest {
+    int64 id = 1;
+}
+
+message UserInfoResponse {
+    User user = 1;
+}
+
+message FollowOrCancelRequest {
+    int64 id = 1;
+    string action_type = 2;
+}
+
+message FollowOrCancelResponse {
+}
+
+message GetFollowingsRequest {
+    int64 id = 1;
+}
+
+message GetFollowingsResponse {
+    repeated User user_list = 1;
+}
+
+message GetFollowersRequest {
+    int64 id = 1;
+}
+
+message GetFollowersResponse {
+    repeated User user_list = 1;
+}
+
+message GetFriendsRequest {
+    int64 id = 1;
+}
+
+message GetFriendsResponse {
+    repeated User user_list = 1;
+}
+
+message GetChatMessagesRequest {
+    int64 id = 1;
+    string pre_msg_time = 2;
+}
+
+message GetChatMessagesResponse {
+    repeated Message chat_message_list = 1;
+}
+
+message SendMessageRequest {
+    int64 id = 1;
+    string content = 2;
+}
+
+message SendMessageResponse {
+}
+
+service VideoService {
+    rpc GetUserVideoList(UserVideoListRequest) returns (UserVideoListResponse) {};
+    rpc GetVideoFlow(VideoFlowRequest) returns (VideoFlowResponse) {};
+    rpc PublishVideo(PublishVideoRequest) returns (PublishVideoResponse) {};
+    rpc LikeVideo(LikeVideoRequest) returns (LikeVideoResponse) {};
+    rpc GetUserLike(UserLikeRequest) returns (UserLikeResponse) {};
+    rpc CommentVideo(CommentVideoRequest) returns (CommentVideoResponse) {};
+    rpc DeleteComment(CommentVideoRequest) returns (CommentVideoResponse) {};
+    rpc GetVideoComment(VideoCommentRequest) returns (VideoCommentResponse) {};
+}
+
+message UserVideoListRequest {
+    int64 id = 1;
+}
+message UserVideoListResponse {
+    repeated Video video_list = 1;
+}
+
+message VideoFlowRequest {
+    int64 latest_time = 1;
+    string token = 2;
+}
+
+message VideoFlowResponse {
+    repeated Video video_list = 1;
+}
+
+message PublishVideoRequest {
+    bytes content = 1;
+    string title = 2;
+}
+
+message PublishVideoResponse {
+}
+
+message LikeVideoRequest {
+    int64 id = 1;
+    string action_type = 2;
+}
+
+message LikeVideoResponse {
+}
+
+message UserLikeRequest {
+    int64 id = 1;
+}
+
+message UserLikeResponse {
+    repeated Video video_list = 1;
+}
+
+message CommentVideoRequest {
+    int64 id = 1;
+    string content = 2;
+}
+
+message CommentVideoResponse {
+    Comment comment = 1;
+}
+
+message VideoCommentRequest {
+    int64 id = 1;
+}
+
+message VideoCommentResponse {
+    repeated Comment comment_list = 1;
+}
