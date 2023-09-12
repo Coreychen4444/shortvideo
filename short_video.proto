@@ -131,7 +131,7 @@ message SendMessageResponse {
 service VideoService {
     rpc GetUserVideoList(UserVideoListRequest) returns (UserVideoListResponse) {};
     rpc GetVideoFlow(VideoFlowRequest) returns (VideoFlowResponse) {};
-    rpc PublishVideo(stream PublishVideoRequest) returns (PublishVideoResponse) {};
+    rpc PublishVideo(PublishVideoRequest) returns (PublishVideoResponse) {};
     rpc LikeVideo(LikeVideoRequest) returns (LikeVideoResponse) {};
     rpc GetUserLike(UserLikeRequest) returns (UserLikeResponse) {};
     rpc CommentVideo(CommentVideoRequest) returns (CommentVideoResponse) {};

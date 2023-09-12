@@ -421,7 +421,7 @@ const (
 type VideoServiceClient interface {
 	GetUserVideoList(ctx context.Context, in *UserVideoListRequest, opts ...grpc.CallOption) (*UserVideoListResponse, error)
 	GetVideoFlow(ctx context.Context, in *VideoFlowRequest, opts ...grpc.CallOption) (*VideoFlowResponse, error)
-	PublishVideo(ctx context.Context, opts ...grpc.CallOption) (VideoService_PublishVideoClient, error)
+	PublishVideo(ctx context.Context, in *PublishVideoRequest, opts ...grpc.CallOption) (*PublishVideoResponse, error)
 	LikeVideo(ctx context.Context, in *LikeVideoRequest, opts ...grpc.CallOption) (*LikeVideoResponse, error)
 	GetUserLike(ctx context.Context, in *UserLikeRequest, opts ...grpc.CallOption) (*UserLikeResponse, error)
 	CommentVideo(ctx context.Context, in *CommentVideoRequest, opts ...grpc.CallOption) (*CommentVideoResponse, error)
@@ -455,38 +455,13 @@ func (c *videoServiceClient) GetVideoFlow(ctx context.Context, in *VideoFlowRequ
 	return out, nil
 }
 
-func (c *videoServiceClient) PublishVideo(ctx context.Context, opts ...grpc.CallOption) (VideoService_PublishVideoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &VideoService_ServiceDesc.Streams[0], VideoService_PublishVideo_FullMethodName, opts...)
+func (c *videoServiceClient) PublishVideo(ctx context.Context, in *PublishVideoRequest, opts ...grpc.CallOption) (*PublishVideoResponse, error) {
+	out := new(PublishVideoResponse)
+	err := c.cc.Invoke(ctx, VideoService_PublishVideo_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &videoServicePublishVideoClient{stream}
-	return x, nil
-}
-
-type VideoService_PublishVideoClient interface {
-	Send(*PublishVideoRequest) error
-	CloseAndRecv() (*PublishVideoResponse, error)
-	grpc.ClientStream
-}
-
-type videoServicePublishVideoClient struct {
-	grpc.ClientStream
-}
-
-func (x *videoServicePublishVideoClient) Send(m *PublishVideoRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *videoServicePublishVideoClient) CloseAndRecv() (*PublishVideoResponse, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(PublishVideoResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *videoServiceClient) LikeVideo(ctx context.Context, in *LikeVideoRequest, opts ...grpc.CallOption) (*LikeVideoResponse, error) {
@@ -540,7 +515,7 @@ func (c *videoServiceClient) GetVideoComment(ctx context.Context, in *VideoComme
 type VideoServiceServer interface {
 	GetUserVideoList(context.Context, *UserVideoListRequest) (*UserVideoListResponse, error)
 	GetVideoFlow(context.Context, *VideoFlowRequest) (*VideoFlowResponse, error)
-	PublishVideo(VideoService_PublishVideoServer) error
+	PublishVideo(context.Context, *PublishVideoRequest) (*PublishVideoResponse, error)
 	LikeVideo(context.Context, *LikeVideoRequest) (*LikeVideoResponse, error)
 	GetUserLike(context.Context, *UserLikeRequest) (*UserLikeResponse, error)
 	CommentVideo(context.Context, *CommentVideoRequest) (*CommentVideoResponse, error)
@@ -559,8 +534,8 @@ func (UnimplementedVideoServiceServer) GetUserVideoList(context.Context, *UserVi
 func (UnimplementedVideoServiceServer) GetVideoFlow(context.Context, *VideoFlowRequest) (*VideoFlowResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideoFlow not implemented")
 }
-func (UnimplementedVideoServiceServer) PublishVideo(VideoService_PublishVideoServer) error {
-	return status.Errorf(codes.Unimplemented, "method PublishVideo not implemented")
+func (UnimplementedVideoServiceServer) PublishVideo(context.Context, *PublishVideoRequest) (*PublishVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) LikeVideo(context.Context, *LikeVideoRequest) (*LikeVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LikeVideo not implemented")
@@ -626,30 +601,22 @@ func _VideoService_GetVideoFlow_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VideoService_PublishVideo_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(VideoServiceServer).PublishVideo(&videoServicePublishVideoServer{stream})
-}
-
-type VideoService_PublishVideoServer interface {
-	SendAndClose(*PublishVideoResponse) error
-	Recv() (*PublishVideoRequest, error)
-	grpc.ServerStream
-}
-
-type videoServicePublishVideoServer struct {
-	grpc.ServerStream
-}
-
-func (x *videoServicePublishVideoServer) SendAndClose(m *PublishVideoResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *videoServicePublishVideoServer) Recv() (*PublishVideoRequest, error) {
-	m := new(PublishVideoRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _VideoService_PublishVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishVideoRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(VideoServiceServer).PublishVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_PublishVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).PublishVideo(ctx, req.(*PublishVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _VideoService_LikeVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -758,6 +725,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _VideoService_GetVideoFlow_Handler,
 		},
 		{
+			MethodName: "PublishVideo",
+			Handler:    _VideoService_PublishVideo_Handler,
+		},
+		{
 			MethodName: "LikeVideo",
 			Handler:    _VideoService_LikeVideo_Handler,
 		},
@@ -778,12 +749,6 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _VideoService_GetVideoComment_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "PublishVideo",
-			Handler:       _VideoService_PublishVideo_Handler,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "short_video.proto",
 }
