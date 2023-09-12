@@ -131,7 +131,7 @@ message SendMessageResponse {
 service VideoService {
     rpc GetUserVideoList(UserVideoListRequest) returns (UserVideoListResponse) {};
     rpc GetVideoFlow(VideoFlowRequest) returns (VideoFlowResponse) {};
-    rpc PublishVideo(PublishVideoRequest) returns (PublishVideoResponse) {};
+    rpc PublishVideo(stream PublishVideoRequest) returns (PublishVideoResponse) {};
     rpc LikeVideo(LikeVideoRequest) returns (LikeVideoResponse) {};
     rpc GetUserLike(UserLikeRequest) returns (UserLikeResponse) {};
     rpc CommentVideo(CommentVideoRequest) returns (CommentVideoResponse) {};
@@ -153,6 +153,7 @@ message VideoFlowRequest {
 
 message VideoFlowResponse {
     repeated Video video_list = 1;
+    int64 NextTime = 2;
 }
 
 message PublishVideoRequest {
